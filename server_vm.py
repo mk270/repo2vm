@@ -102,11 +102,3 @@ class ServerVM(object):
     def run(self):
         instance = launch_instance(self.name)
         setup_remote_repository(instance, self.git_reference)
-
-def run():
-    _, name, git_reference = sys.argv
-    instance = launch_instance(name)
-    setup_remote_repository(instance, git_reference)
-
-if __name__ == '__main__':
-    run()
