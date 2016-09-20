@@ -83,6 +83,15 @@ def setup_remote_repository(instance, git_reference):
         status, stderr, stdout = ssh.run(cmd)
         assert status == 0
 
+class ServerVM(object):
+    def __init__(self, name, git_reference):
+        self.name = name
+        self.git_reference = git_reference
+
+    def run(self):
+        instance = launch_instance(self.name)
+        setup_remote_repository(instance, self.git_reference)
+
 def run():
     _, name, git_reference = sys.argv
     instance = launch_instance(name)
