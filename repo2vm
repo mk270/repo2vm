@@ -1,0 +1,17 @@
+#!/usr/bin/env python2
+
+import argparse
+import server_vm
+
+def run():
+    p = argparse.ArgumentParser()
+    p.add_argument("vm_name_tag")
+    p.add_argument("git_reference")
+    options = p.parse_args()
+    print "VM name tag: ", options.vm_name_tag
+    print "Reference: ", options.git_reference
+    instance = server_vm.launch_instance(options.vm_name_tag)
+    server_vm.setup_remote_repository(instance, options.git_reference)
+
+if __name__ == '__main__':
+    run()
