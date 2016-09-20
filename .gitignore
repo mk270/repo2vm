@@ -1,3 +1,5 @@
 *~
 *.pyc
+secrets.sh
+ec2_config.json
 
