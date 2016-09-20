@@ -1,0 +1,6 @@
+{
+    "ami_id": "ami-01542872",
+    "region": "eu-west-1",
+    "key_name": "our-project-keys",
+    "security_groups": ["our-project-server-sg"]
+}
