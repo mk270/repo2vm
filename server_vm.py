@@ -8,17 +8,6 @@ import time
 import subprocess
 from configuration import get_config
 
-def poll_until_running(reservation):
-    """Block until the instance is usable."""
-
-    instance = reservation.instances[0]
-
-    status = instance.update()
-    while status != "running":
-        print instance, status
-        time.sleep(11)
-        status = instance.update()
-
 
 def setup_remote_repository(instance, git_reference):
     key_file = "/home/mk270/.ssh/tmtkeys.pem"
@@ -75,6 +64,17 @@ class ServerVM(object):
         )
 
         instance = reservation.instances[0]
-        poll_until_running(reservation)
+        self.poll_until_running(reservation)
         conn.create_tags(instance.id, {"Name": self.name})
         return instance
+
+    def poll_until_running(self, reservation):
+        """Block until the instance is usable."""
+
+        instance = reservation.instances[0]
+
+        status = instance.update()
+        while status != "running":
+            print instance, status
+            time.sleep(11)
+            status = instance.update()
