@@ -10,10 +10,14 @@ from configuration import get_config
 
 
 class ServerVM(object):
+    class SSHCmdFailed(Exception): pass
+
     def __init__(self, name, git_reference):
         self.name = name
         self.git_reference = git_reference
         self.instance = None
+        self.ssh = None
+        self.key_file = "/home/mk270/.ssh/tmtkeys.pem"
 
     def run(self):
         self.instance = self.launch_instance()
@@ -48,26 +52,19 @@ class ServerVM(object):
             status = instance.update()
 
     def setup_remote_repository(self):
-        key_file = "/home/mk270/.ssh/tmtkeys.pem"
         cmds = [ "mkdir -p ~/.ssh",
                  "ssh-keyscan git.unipart.io >> ~/.ssh/known_hosts",
                  "mkdir -p ~/repos"
                  ]
-        ssh = boto.manage.cmdshell.sshclient_from_instance(
-            self.instance,
-            key_file,
-            user_name="ubuntu")
         for cmd in cmds:
-            print "CMD", cmd
-            status, stderr, stdout = ssh.run(cmd)
-            assert status == 0
+            self.ssh_exec(cmd)
 
         logname = os.environ["LOGNAME"] # YES, really
         repo = "ssh://%s@git.unipart.io//home/scm/hawkeye.git" % logname
 
         subprocess.check_call([
             "ssh", "-A", "-l", "ubuntu",
-            "-i", key_file,
+            "-i", self.key_file,
             "-o", "UserKnownHostsFile=/dev/null",
             "-o", "StrictHostKeyChecking=no",
             self.instance.ip_address,
@@ -76,6 +73,21 @@ class ServerVM(object):
 
         cmds = [ "git -C repos/hawkeye checkout %s" % self.git_reference ]
         for cmd in cmds:
-            print "CMD", cmd
-            status, stderr, stdout = ssh.run(cmd)
-            assert status == 0
+            self.ssh_exec(cmd)
+
+    def setup_ssh(self):
+        return boto.manage.cmdshell.sshclient_from_instance(
+            self.instance,
+            self.key_file,
+            user_name="ubuntu"
+        )
+
+    def ssh_exec(self, cmd):
+        if self.ssh is None:
+            self.ssh = self.setup_ssh()
+
+        print "CMD", cmd
+        status, stdout, stderr = self.ssh.run(cmd)
+        if status != 0:
+            print stderr
+            raise SSHCmdFailed(cmd)
