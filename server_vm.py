@@ -25,7 +25,7 @@ def poll_until_running(reservation):
 def get_env():
     def lookup_var(var):
         if var not in os.environ:
-            raise MissingEnv("Missing environment variable: %s" % var)
+            raise MissingEnv("Missing environment variable: $%s" % var)
         return os.environ[var]
 
     vars = [ "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY" ]
