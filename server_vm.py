@@ -13,10 +13,11 @@ class ServerVM(object):
     def __init__(self, name, git_reference):
         self.name = name
         self.git_reference = git_reference
+        self.instance = None
 
     def run(self):
-        instance = self.launch_instance()
-        self.setup_remote_repository(instance)
+        self.instance = self.launch_instance()
+        self.setup_remote_repository()
 
     def launch_instance(self):
         """Create an instance, wait for it to come up, and tag it with a name"""
@@ -46,14 +47,14 @@ class ServerVM(object):
             time.sleep(11)
             status = instance.update()
 
-    def setup_remote_repository(self, instance):
+    def setup_remote_repository(self):
         key_file = "/home/mk270/.ssh/tmtkeys.pem"
         cmds = [ "mkdir -p ~/.ssh",
                  "ssh-keyscan git.unipart.io >> ~/.ssh/known_hosts",
                  "mkdir -p ~/repos"
                  ]
         ssh = boto.manage.cmdshell.sshclient_from_instance(
-            instance,
+            self.instance,
             key_file,
             user_name="ubuntu")
         for cmd in cmds:
@@ -69,7 +70,7 @@ class ServerVM(object):
             "-i", key_file,
             "-o", "UserKnownHostsFile=/dev/null",
             "-o", "StrictHostKeyChecking=no",
-            instance.ip_address,
+            self.instance.ip_address,
             "git", "clone", repo, "repos/hawkeye"
         ])
 
