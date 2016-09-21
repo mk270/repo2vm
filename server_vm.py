@@ -52,15 +52,16 @@ class ServerVM(object):
             status = instance.update()
 
     def setup_remote_repository(self):
+        repo_host = "git.unipart.io"
         cmds = [ "mkdir -p ~/.ssh",
-                 "ssh-keyscan git.unipart.io >> ~/.ssh/known_hosts",
+                 "ssh-keyscan %s >> ~/.ssh/known_hosts" % repo_host,
                  "mkdir -p ~/repos"
                  ]
         for cmd in cmds:
             self.ssh_exec(cmd)
 
         logname = os.environ["LOGNAME"] # YES, really
-        repo = "ssh://%s@git.unipart.io//home/scm/hawkeye.git" % logname
+        repo = "ssh://%s@%s//home/scm/hawkeye.git" % (logname, repo_host)
         self.ssh_agent_exec([ "git", "clone", repo, "repos/hawkeye" ])
 
         cmds = [ "git -C repos/hawkeye checkout %s" % self.git_reference ]
