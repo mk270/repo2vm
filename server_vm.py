@@ -18,6 +18,7 @@ class ServerVM(object):
         self.instance = None
         self.ssh = None
         self.key_file = "/home/mk270/.ssh/tmtkeys.pem"
+        self.remote_username = "ubuntu"
 
     def run(self):
         self.instance = self.launch_instance()
@@ -72,7 +73,7 @@ class ServerVM(object):
         return boto.manage.cmdshell.sshclient_from_instance(
             self.instance,
             self.key_file,
-            user_name="ubuntu"
+            user_name=self.remote_username
         )
 
     def ssh_exec(self, cmd):
@@ -87,7 +88,7 @@ class ServerVM(object):
 
     def ssh_agent_exec(self, args):
         local_args = [
-            "ssh", "-A", "-l", "ubuntu",
+            "ssh", "-A", "-l", self.remote_username,
             "-i", self.key_file,
             "-o", "UserKnownHostsFile=/dev/null",
             "-o", "StrictHostKeyChecking=no",
@@ -96,4 +97,6 @@ class ServerVM(object):
         subprocess.check_call(local_args + args)
 
     def ssh_example(self):
-        return """To access:\n\n  ssh ubuntu@%s""" % self.instance.ip_address
+        return """To access:\n\n  ssh %s@%s""" % (
+            self.remote_username, self.instance.ip_address
+        )
