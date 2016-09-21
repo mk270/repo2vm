@@ -61,15 +61,7 @@ class ServerVM(object):
 
         logname = os.environ["LOGNAME"] # YES, really
         repo = "ssh://%s@git.unipart.io//home/scm/hawkeye.git" % logname
-
-        subprocess.check_call([
-            "ssh", "-A", "-l", "ubuntu",
-            "-i", self.key_file,
-            "-o", "UserKnownHostsFile=/dev/null",
-            "-o", "StrictHostKeyChecking=no",
-            self.instance.ip_address,
-            "git", "clone", repo, "repos/hawkeye"
-        ])
+        self.ssh_agent_exec([ "git", "clone", repo, "repos/hawkeye" ])
 
         cmds = [ "git -C repos/hawkeye checkout %s" % self.git_reference ]
         for cmd in cmds:
@@ -91,3 +83,13 @@ class ServerVM(object):
         if status != 0:
             print stderr
             raise SSHCmdFailed(cmd)
+
+    def ssh_agent_exec(self, args):
+        local_args = [
+            "ssh", "-A", "-l", "ubuntu",
+            "-i", self.key_file,
+            "-o", "UserKnownHostsFile=/dev/null",
+            "-o", "StrictHostKeyChecking=no",
+            self.instance.ip_address
+        ]
+        subprocess.check_call(local_args + args)
