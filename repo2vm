@@ -7,11 +7,16 @@ def run():
     p = argparse.ArgumentParser()
     p.add_argument("vm_name_tag")
     p.add_argument("git_reference")
+    p.add_argument("pub_key_file")
+    p.add_argument("-f", dest="conf_file", default="ec2_config.json",
+                   help="Location of alternative configuration file")
     options = p.parse_args()
+
     print "VM name tag: ", options.vm_name_tag
     print "Reference: ", options.git_reference
 
-    vm = ServerVM(options.vm_name_tag, options.git_reference)
+    vm = ServerVM(options.vm_name_tag, options.git_reference,
+                  options.pub_key_file, options.conf_file)
     vm.run()
     print vm.ssh_example()
 

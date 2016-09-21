@@ -15,14 +15,12 @@ def get_env():
     config_env = dict([ (k.lower(), lookup_var(k)) for k in vars ])
     return config_env
 
-def get_config():
+def get_config(conf_file):
     """Return a dictionary of config items, from ec2.config_json and
     the $AWS_ACCESS_KEY_ID and $AWS_SECRET_ACCESS_KEY environment
     variables"""
 
-    cwd = os.path.dirname(os.path.realpath(__file__))
-    config_path = os.path.join(cwd, "ec2_config.json")
-    config = json.load(file(config_path))
+    config = json.load(file(conf_file))
 
     config["security_options"] = get_env()
     return config

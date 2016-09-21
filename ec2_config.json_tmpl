@@ -2,5 +2,8 @@
     "ami_id": "ami-01542872",
     "region": "eu-west-1",
     "key_name": "our-project-keys",
-    "security_groups": ["our-project-server-sg"]
+    "security_groups": ["our-project-server-sg"],
+    "user_name": "ubuntu",
+    "repo_host": "git.mycompany.com",
+    "repo_path": "//home/scm/our-project.git"
 }

@@ -12,15 +12,17 @@ from configuration import get_config
 class ServerVM(object):
     class SSHCmdFailed(Exception): pass
 
-    def __init__(self, name, git_reference):
+    def __init__(self, name, git_reference, key_file, conf_file):
         self.name = name
         self.git_reference = git_reference
         self.instance = None
         self.ssh = None
-        self.key_file = "/home/mk270/.ssh/tmtkeys.pem"
-        self.remote_username = "ubuntu"
-        self.repo_host = "git.unipart.io"
-        self.repo_path = "//home/scm/hawkeye.git"
+        self.key_file = key_file
+
+        self.config = get_config(conf_file)
+        self.remote_username = self.config["user_name"]
+        self.repo_host = self.config["repo_host"]
+        self.repo_path = self.config["repo_path"]
 
     def run(self):
         self.instance = self.launch_instance()
@@ -29,13 +31,14 @@ class ServerVM(object):
     def launch_instance(self):
         """Create an instance, wait for it to come up, and tag it with a name"""
 
-        config = get_config()
-        security_options = config["security_options"]
-        conn = boto.ec2.connect_to_region(config["region"], **security_options)
+        security_options = self.config["security_options"]
+        region = self.config["region"]
+
+        conn = boto.ec2.connect_to_region(region, **security_options)
         reservation = conn.run_instances(
-            config["ami_id"],
-            key_name=config["key_name"],
-            security_groups=config["security_groups"]
+            self.config["ami_id"],
+            key_name=self.config["key_name"],
+            security_groups=self.config["security_groups"]
         )
 
         instance = reservation.instances[0]
