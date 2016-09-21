@@ -97,6 +97,6 @@ class ServerVM(object):
         subprocess.check_call(local_args + args)
 
     def ssh_example(self):
-        return """To access:\n\n  ssh %s@%s""" % (
-            self.remote_username, self.instance.ip_address
+        return """To access:\n\n  ssh -i %s %s@%s""" % (
+            self.key_file, self.remote_username, self.instance.ip_address
         )
