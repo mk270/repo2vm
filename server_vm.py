@@ -20,6 +20,7 @@ class ServerVM(object):
         self.key_file = "/home/mk270/.ssh/tmtkeys.pem"
         self.remote_username = "ubuntu"
         self.repo_host = "git.unipart.io"
+        self.repo_path = "//home/scm/hawkeye.git"
 
     def run(self):
         self.instance = self.launch_instance()
@@ -53,6 +54,13 @@ class ServerVM(object):
             time.sleep(11)
             status = instance.update()
 
+    def _tidy_repo_name(self, repo_name):
+        if "/" in repo_name:
+            repo_name = repo_name.split("/")[-1]
+        if repo_name.endswith(".git"):
+            repo_name = repo_name[:-4]
+        return repo_name
+
     def setup_remote_repository(self):
         cmds = [ "mkdir -p ~/.ssh",
                  "ssh-keyscan %s >> ~/.ssh/known_hosts" % self.repo_host,
@@ -61,9 +69,12 @@ class ServerVM(object):
         for cmd in cmds:
             self.ssh_exec(cmd)
 
+        tidy_repo = self._tidy_repo_name(self.repo_path)
+        repo_dir = "repos/" + tidy_repo
+
         logname = os.environ["LOGNAME"] # YES, really
-        repo = "ssh://%s@%s//home/scm/hawkeye.git" % (logname, self.repo_host)
-        self.ssh_agent_exec([ "git", "clone", repo, "repos/hawkeye" ])
+        repo = "ssh://%s@%s%s" % (logname, self.repo_host, self.repo_path)
+        self.ssh_agent_exec([ "git", "clone", repo, repo_dir ])
 
         cmds = [ "git -C repos/hawkeye checkout %s" % self.git_reference ]
         for cmd in cmds:
