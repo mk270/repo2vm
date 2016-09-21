@@ -94,3 +94,6 @@ class ServerVM(object):
             self.instance.ip_address
         ]
         subprocess.check_call(local_args + args)
+
+    def ssh_example(self):
+        return """To access:\n\n  ssh ubuntu@%s""" % self.instance.ip_address
