@@ -19,6 +19,7 @@ class ServerVM(object):
         self.ssh = None
         self.key_file = "/home/mk270/.ssh/tmtkeys.pem"
         self.remote_username = "ubuntu"
+        self.repo_host = "git.unipart.io"
 
     def run(self):
         self.instance = self.launch_instance()
@@ -53,16 +54,15 @@ class ServerVM(object):
             status = instance.update()
 
     def setup_remote_repository(self):
-        repo_host = "git.unipart.io"
         cmds = [ "mkdir -p ~/.ssh",
-                 "ssh-keyscan %s >> ~/.ssh/known_hosts" % repo_host,
+                 "ssh-keyscan %s >> ~/.ssh/known_hosts" % self.repo_host,
                  "mkdir -p ~/repos"
                  ]
         for cmd in cmds:
             self.ssh_exec(cmd)
 
         logname = os.environ["LOGNAME"] # YES, really
-        repo = "ssh://%s@%s//home/scm/hawkeye.git" % (logname, repo_host)
+        repo = "ssh://%s@%s//home/scm/hawkeye.git" % (logname, self.repo_host)
         self.ssh_agent_exec([ "git", "clone", repo, "repos/hawkeye" ])
 
         cmds = [ "git -C repos/hawkeye checkout %s" % self.git_reference ]
