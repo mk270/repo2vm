@@ -18,6 +18,7 @@ def run():
     vm = ServerVM(options.vm_name_tag, options.git_reference,
                   options.pub_key_file, options.conf_file)
     vm.run()
+    vm.run_script()
     print vm.ssh_example()
 
 if __name__ == '__main__':

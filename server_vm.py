@@ -90,6 +90,9 @@ class ServerVM(object):
             user_name=self.remote_username
         )
 
+    def run_script(self):
+        self.ssh_exec(self.config["script"])
+
     def ssh_exec(self, cmd):
         if self.ssh is None:
             self.ssh = self.setup_ssh()
